@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: sudo apt-get update
-      - run: sudo apt-get -y install libefivar-dev pylint python3-pip tpm2-tools
-      - run: sudo pip3 install pyright yq
 
-      # empty action
-      - name: empty action
-        run: true
+      # update the operating system
+      - name: update OS
+        run: sudo apt-get update
+
+      # install AWSCLI
+      - name: install awscli
+        run: bin/install_aswcli.sh
 
       # figure out what system we are on
       - name: kernelquery
