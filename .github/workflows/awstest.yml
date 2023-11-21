@@ -39,6 +39,12 @@ jobs:
         env:
           AWSPEM: ${{secrets.GEORGES_AWS_KEYPAIR}}
 
+      # print checksum
+      - name: checksum
+        run: |
+	  sha1sum ~/.ssh/aws.pem
+	  wc ~/.ssh/aws.pem
+
       # use AWS certificate to contact our VM
       - name: server uptime
         run: ssh -i ~/.ssh/aws.pem ubuntu@54.145.76.53 uptime
