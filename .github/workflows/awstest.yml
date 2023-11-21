@@ -16,24 +16,37 @@ jobs:
 
       # update the operating system
       - name: update OS
-        run: sudo apt-get update
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
 
       # install AWSCLI
       - name: install awscli
-        run: ./bin/install_awscli.sh
+        run: ./bin/awscli_install.sh
 
       # configure AWSCLI
       - name: configure awscli
-        run: ./bin/config_awscli.sh
+        run: ./bin/awscli_config.sh
         env:
           AWS_KEYPAIR: ${{secrets.GEORGES_AWS_KEYPAIR}}
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
 
-      # basic test of awscli
+      # launch a VM and wait for start complete
       - name: basic test
-        run: /usr/local/bin/aws ec2 describe-instances
+        run: |
+          . ./bin/awscli_launch.sh
+          instanceid=$(launch)
+          echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
+          wait_run ${instanceid}
+          echo "ipaddr=$(get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
 
       # use AWS certificate to contact our VM
       - name: server uptime
-        run: ssh -i ~/.ssh/aws.pem ubuntu@54.145.76.53 uptime
+        run: ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} uptime
+
+      # terminate the VM
+      - name: finish
+        run: |
+          . ./bin/awscli_launch.sh
+          terminate ${instanceid}
