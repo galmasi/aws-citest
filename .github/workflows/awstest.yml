@@ -9,9 +9,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  buildruntest:
+  awstest:
     runs-on: ubuntu-latest
     steps:
+      - shell: bash
       - uses: actions/checkout@v3
 
       # update the operating system
@@ -29,3 +30,14 @@ jobs:
       # figure out what distro we are on
       - name: distroquery
         run: cat /etc/lsb-release
+
+      # read ID key into a private cert
+      - name: read secret
+        with:
+	  awscert: ${{GEORGES_AWS_KEYPAIR}}
+	run:
+	  echo "$awscert" > ~/.ssh/aws.pem && chmod 0600 ~/.ssh/aws.pem
+
+      # use AWS certificate to contact our VM
+      - name: server uptime
+        run: ssh -i ~/.ssh/aws.pem ubuntu@54.145.76.53 uptime
