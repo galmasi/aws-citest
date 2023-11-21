@@ -44,9 +44,9 @@ jobs:
         run: |
           sha1sum ~/.ssh/aws.pem
           wc ~/.ssh/aws.pem
-	  echo "StrictHostKeyChecking=no" > ~/.ssh/config
-	  echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
-	  echo "LogLevel=ERROR" >> ~/.ssh/config
+          echo "StrictHostKeyChecking=no" > ~/.ssh/config
+          echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
+          echo "LogLevel=ERROR" >> ~/.ssh/config
 
       # use AWS certificate to contact our VM
       - name: server uptime
