@@ -22,31 +22,17 @@ jobs:
       - name: install awscli
         run: ./bin/install_awscli.sh
 
-      # figure out what system we are on
-      - name: kernelquery
-        run: uname -a
-
-      # figure out what distro we are on
-      - name: distroquery
-        run: cat /etc/lsb-release
-
-      # read AWS certificate
-      - name: read secret
-        run: |
-          mkdir -p ~/.ssh
-          echo "$AWSPEM" > ~/.ssh/aws.pem
-          chmod 0600 ~/.ssh/aws.pem
+      # configure AWSCLI
+      - name: configure awscli
+        run: ./bin/config_awscli.sh
         env:
-          AWSPEM: ${{secrets.GEORGES_AWS_KEYPAIR}}
+          AWS_KEYPAIR: ${{secrets.GEORGES_AWS_KEYPAIR}}
+	  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+	  AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
 
-      # print checksum
-      - name: checksum
-        run: |
-          sha1sum ~/.ssh/aws.pem
-          wc ~/.ssh/aws.pem
-          echo "StrictHostKeyChecking=no" > ~/.ssh/config
-          echo "UserKnownHostsFile=/dev/null" >> ~/.ssh/config
-          echo "LogLevel=ERROR" >> ~/.ssh/config
+      # basic test of awscli
+      - name: basic test
+        run: /usr/local/bin/aws ec2 describe-instances
 
       # use AWS certificate to contact our VM
       - name: server uptime
