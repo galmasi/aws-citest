@@ -33,6 +33,7 @@ jobs:
       # read AWS certificate
       - name: read secret
         run: |
+          mkdir -p ~/.ssh
           echo "$AWSPEM" > ~/.ssh/aws.pem
           chmod 0600 ~/.ssh/aws.pem
         env:
