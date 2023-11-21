@@ -27,8 +27,8 @@ jobs:
         run: ./bin/config_awscli.sh
         env:
           AWS_KEYPAIR: ${{secrets.GEORGES_AWS_KEYPAIR}}
-	  AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
-	  AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
+          AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
+          AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
 
       # basic test of awscli
       - name: basic test
