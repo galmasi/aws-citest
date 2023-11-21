@@ -42,8 +42,8 @@ jobs:
       # print checksum
       - name: checksum
         run: |
-	  sha1sum ~/.ssh/aws.pem
-	  wc ~/.ssh/aws.pem
+          sha1sum ~/.ssh/aws.pem
+          wc ~/.ssh/aws.pem
 
       # use AWS certificate to contact our VM
       - name: server uptime
