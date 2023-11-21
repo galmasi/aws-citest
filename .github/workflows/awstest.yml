@@ -34,9 +34,9 @@ jobs:
       # read ID key into a private cert
       - name: read secret
         with:
-	  awscert: ${{GEORGES_AWS_KEYPAIR}}
-	run:
-	  echo "$awscert" > ~/.ssh/aws.pem && chmod 0600 ~/.ssh/aws.pem
+          awscert: ${{GEORGES_AWS_KEYPAIR}}
+        run:
+          echo "$awscert" > ~/.ssh/aws.pem && chmod 0600 ~/.ssh/aws.pem
 
       # use AWS certificate to contact our VM
       - name: server uptime
