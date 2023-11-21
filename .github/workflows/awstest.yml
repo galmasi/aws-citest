@@ -18,13 +18,9 @@ jobs:
       - name: update OS
         run: sudo apt-get update
 
-      # check working directory
-      - name: check working directory
-        run: pwd; ls
-
       # install AWSCLI
       - name: install awscli
-        run: bin/install_aswcli.sh
+        run: ./bin/install_awscli.sh
 
       # figure out what system we are on
       - name: kernelquery
