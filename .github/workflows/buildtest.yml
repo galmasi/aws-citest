@@ -1,0 +1,30 @@
+name: aws_test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  buildruntest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: sudo apt-get update
+      - run: sudo apt-get -y install libefivar-dev pylint python3-pip tpm2-tools
+      - run: sudo pip3 install pyright yq
+
+      # empty action
+      - name: empty action
+        run: true
+
+      # figure out what system we are on
+      - name: kernelquery
+        run: uname -a
+
+      # figure out what distro we are on
+      - name: distroquery
+        run: cat /etc/lsb-release
