@@ -36,7 +36,7 @@ jobs:
       - name: basic test
         run: |
           . ./bin/awscli.sh
-          instanceid=$(aswcli_launch)
+          instanceid=$(awscli_launch)
           echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
           awscli_wait_run ${instanceid} || exit -1
           echo "ipaddr=$(awscli_get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
