@@ -32,14 +32,14 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
 
-      # launch a VM and wait for start complete
+      # launch a VM and wait for start complete.
       - name: basic test
         run: |
-          . ./bin/awscli_launch.sh
-          instanceid=$(launch)
+          . ./bin/awscli.sh
+          instanceid=$(aswcli_launch)
           echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
-          wait_run ${instanceid}
-          echo "ipaddr=$(get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
+	  awscli_wait_run ${instanceid} || exit -1
+          echo "ipaddr=$(awscli_get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
 
       # use AWS certificate to contact our VM
       - name: server uptime
@@ -47,6 +47,7 @@ jobs:
 
       # terminate the VM
       - name: finish
+        if: success() || failure()
         run: |
-          . ./bin/awscli_launch.sh
-          terminate ${instanceid}
+          . ./bin/awscli.sh
+	  if [[ ${instanceid} != "" ]] ; then awscli_terminate ${instanceid} ; fi
