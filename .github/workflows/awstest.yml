@@ -52,7 +52,7 @@ jobs:
       # install minikube on the target VM
       - name: install and start minikube
         run: |
-          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64 && \
+          curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64 && \
           scp -i ~/.ssh/aws.pem /tmp/minikube-linux-amd64 ubuntu@${ipaddr}: && \
           ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} sudo install minikube-linux-amd64 /usr/local/bin/minikube && \
           ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} minikube start
