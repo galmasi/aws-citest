@@ -22,7 +22,9 @@ jobs:
 
       # install AWSCLI
       - name: install awscli
-        run: ./bin/awscli_install.sh
+        run: |
+          . ./bin/awscli.sh
+          awscli_install
 
       # configure AWSCLI
       - name: configure awscli
@@ -35,7 +37,7 @@ jobs:
           AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
 
       # launch a VM and wait for start complete.
-      - name: basic test
+      - name: create EC2 VM
         run: |
           . ./bin/awscli.sh
           instanceid=$(awscli_launch)
@@ -46,6 +48,14 @@ jobs:
       # use AWS certificate to contact our VM
       - name: server uptime
         run: ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} uptime
+
+      # install minikube on the target VM
+      - name: install and start minikube
+        run: |
+          curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64 && \
+          scp -i ~/.ssh/aws.pem /tmp/minikube-linux-amd64 ubuntu@${ipaddr}: && \
+          ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} sudo install minikube-linux-amd64 /usr/local/bin/minikube && \
+          ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} minikube start
 
       # terminate the VM
       - name: finish

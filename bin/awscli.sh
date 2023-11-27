@@ -4,6 +4,18 @@
 export IMAGEID=${IMAGEID:-ami-025d6a3788eadba52}
 export KEYNAME=${KEYNAME:-george_aws_keypair}
 
+# #############################################################
+# install awscli
+# #############################################################
+
+function awscli_install() {
+    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip && \
+        cd /tmp && unzip awscli2.zip && \
+        ./aws/install
+
+    export PATH=${PATH}:/usr/local/bin
+    aws --version
+}
 
 # #############################################################
 # configure AWS CLI for operation:
