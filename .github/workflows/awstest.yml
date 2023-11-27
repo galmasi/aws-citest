@@ -38,7 +38,7 @@ jobs:
           . ./bin/awscli.sh
           instanceid=$(aswcli_launch)
           echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
-	  awscli_wait_run ${instanceid} || exit -1
+          awscli_wait_run ${instanceid} || exit -1
           echo "ipaddr=$(awscli_get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
 
       # use AWS certificate to contact our VM
@@ -50,4 +50,4 @@ jobs:
         if: success() || failure()
         run: |
           . ./bin/awscli.sh
-	  if [[ ${instanceid} != "" ]] ; then awscli_terminate ${instanceid} ; fi
+          if [[ ${instanceid} != "" ]] ; then awscli_terminate ${instanceid} ; fi
