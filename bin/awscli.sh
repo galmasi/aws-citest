@@ -67,7 +67,7 @@ function awscli_launch() {
 	return 1
     fi
     local instanceid=$(echo "${output}" | jq -r .Instances[0].InstanceId -)
-    aws ec2 create-tags --resources --tags="Key=Name,Value=citest-$$"  >/dev/null 2>&1    
+    aws ec2 create-tags --resources ${instanceid} --tags="Key=Name,Value=citest-$$"  >/dev/null 2>&1    
     echo ${instanceid}
     return 0
 }
@@ -119,7 +119,8 @@ function awscli_wait_run() {
         echo "Timed out"
         exit -1
     else
-        echo "Done"
+        local t1=$(date +%s)
+        echo "done, $((t1-t0)) seconds"
     fi
 
     # step 2: wait for instsance to have a public IP
@@ -137,16 +138,18 @@ function awscli_wait_run() {
         echo "Timed out"
         exit -1
     else
-        echo ${ipaddr}
+        local t1=$(date +%s)
+        echo "${ipaddr}, took $((t1-t0)) seconds"
     fi
 
     # step 3: test public IP
     echo -n "Performing uptime test: "
     while [[ $(date +%s) < $tend ]]
     do
-        if ssh -i ~/.ssh/aws.pem ${ipaddr} uptime > /dev/null 2>&1
+        if ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} uptime > /dev/null 2>&1
         then
-            echo "done"
+            local t1=$(date +%s)
+            echo "done, $((t1-t0)) total seconds to launch"
             return 0
         fi
         echo -n "."
