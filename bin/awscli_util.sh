@@ -11,10 +11,12 @@ export INSTANCETYPE=${INSTANCETYPE:-t3.medium}
 # #############################################################
 
 function awscli_install() {
-    curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip && \
-        cd /tmp && unzip awscli2.zip && \
-        ./aws/install
-
+    if ! curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o /tmp/awscliv2.zip
+    then
+        echo "Failed to download awscli. Exiting."
+        exit -1
+    fi
+    (cd /tmp && unzip awscli2.zip && ./aws/install)
     export PATH=${PATH}:/usr/local/bin
     aws --version
 }
@@ -44,22 +46,30 @@ function awscli_config() {
         exit -1
     fi
     
-    # copy ssh configuration and credentials
+    # create ssh configuration and credentials
     echo "==> Creating AWS/SSH configuration and credentials"
     mkdir ~/.ssh
-    cp config/ssh/config ~/.ssh
+    cat > ~/.ssh/config <<EOF
+StrictHostKeyChecking=no
+UserKnownHostsFile=/dev/null
+LogLevel=ERROR
+EOF
     echo "${AWS_KEYPAIR}" > ~/.ssh/aws.pem
     chmod 600 ~/.ssh/aws.pem
 
-    # copy AWS CLI configuration and credentials
+    # create AWS CLI configuration and credentials
     echo "==> Creating AWSCLI configuration and credentials"
     mkdir ~/.aws
-    cp config/aws/config ~/.aws
+    cat > ~/.aws/config <<EOF
+[default]
+region = us-east-1
+EOF
     chmod 0600 ~/.aws/config
-    cat config/aws/credentials.in | \
-        sed "s/%%AWS_ACCESS_KEY_ID%%/${AWS_ACCESS_KEY_ID}/" | \
-        sed "s^%%AWS_ACCESS_KEY_SECRET%%^${AWS_ACCESS_KEY_SECRET}^" > \
-	    ~/.aws/credentials
+    cat > ~/.aws/credentials <<EOF
+[default]
+aws_access_key_id = ${AWS_ACCESS_KEY_ID}
+aws_secret_access_key = ${AWS_ACCESS_KEY_SECRET}
+EOF
     chmod 0600 ~/.aws/credentials
     return 0
 }
