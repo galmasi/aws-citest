@@ -84,7 +84,8 @@ function awscli_launch() {
 		       --image-id ${IMAGEID} \
 		       --key-name ${KEYNAME} \
 		       --security-group-ids ${SGNAME} \
-		       --instance-type ${INSTANCETYPE})
+		       --instance-type ${INSTANCETYPE} \
+                       --block-device-mappings '[{"DeviceName": "/dev/xvda", "Ebs": {"VolumeSize": 25}}]' )
     if [[ $? != 0 ]]
     then
 	echo "Launch failed"
@@ -197,10 +198,19 @@ function awscli_terminate() {
 
 function awscli_install_minikube() {
     local ipaddr=${1}
+    # install docker
     ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
+sudo apt-get update
+sudo apt-get install -y docker.io
+EOF
+    # install and start minikube
+    ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF    
 curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
 sudo mv /tmp/minikube-linux-amd64 /usr/local/bin/minikube
-/usr/local/minikube start || exit -1
+/usr/local/minikube start
+EOF
+    # install helm (?)
+    ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh || exit -1
