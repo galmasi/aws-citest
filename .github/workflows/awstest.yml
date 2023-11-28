@@ -14,52 +14,51 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      # ---------------------------
       # update the operating system
+      # ---------------------------
       - name: update OS
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq
+          sudo apt-get install -y jq,docker.io
 
-      # install AWSCLI
+      # ---------------------------
+      # install and configure AWSCLI
+      # ---------------------------
       - name: install awscli
         run: |
-          . ./bin/awscli.sh
+          . ./bin/awscli_util.sh
           awscli_install
-
-      # configure AWSCLI
-      - name: configure awscli
-        run: |
-          . ./bin/awscli.sh
           awscli_config
         env:
           AWS_KEYPAIR: ${{secrets.GEORGES_AWS_KEYPAIR}}
           AWS_ACCESS_KEY_ID: ${{secrets.AWS_ACCESS_KEY_ID}}
           AWS_ACCESS_KEY_SECRET: ${{secrets.AWS_ACCESS_KEY_SECRET}}
 
-      # launch a VM and wait for start complete.
+      # ---------------------------
+      # launch an EC2 VM and wait for start complete.
+      # ---------------------------
       - name: create EC2 VM
         run: |
-          . ./bin/awscli.sh
+          . ./bin/awscli_util.sh
           instanceid=$(awscli_launch)
           echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
           awscli_wait_run ${instanceid} || exit -1
           echo "ipaddr=$(awscli_get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
 
-      # use AWS certificate to contact our VM
-      - name: server uptime
-        run: ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} uptime
-
+      # ---------------------------
       # install minikube on the target VM
+      # ---------------------------
       - name: install and start minikube
         run: |
-          curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64 && \
-          scp -i ~/.ssh/aws.pem /tmp/minikube-linux-amd64 ubuntu@${ipaddr}: && \
-          ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} sudo install minikube-linux-amd64 /usr/local/bin/minikube && \
-          ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} minikube start
+          . ./bin/awscli_util.sh
+          awscli_install_minikube ${ipaddr}
 
+      # ---------------------------
       # terminate the VM
+      # ---------------------------
       - name: finish
         if: success() || failure()
         run: |
-          . ./bin/awscli.sh
+          . ./bin/awscli_util.sh
           if [[ ${instanceid} != "" ]] ; then awscli_terminate ${instanceid} ; fi

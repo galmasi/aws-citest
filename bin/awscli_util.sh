@@ -3,6 +3,8 @@
 
 export IMAGEID=${IMAGEID:-ami-025d6a3788eadba52}
 export KEYNAME=${KEYNAME:-george_aws_keypair}
+export SGNAME=${SGNAME:-sg-05863e2cac3b4e3ea}
+export INSTANCETYPE=${INSTANCETYPE:-t3.medium}
 
 # #############################################################
 # install awscli
@@ -67,12 +69,12 @@ function awscli_config() {
 # #############################################################
 
 function awscli_launch() {
-    output=$(aws ec2 run-instances \
-		 --count 1 \
-		 --image-id ${IMAGEID} \
-		 --key-name ${KEYNAME} \
-		 --security-group-ids "sg-05863e2cac3b4e3ea" \
-		 --instance-type t3.medium)
+    local output=$(aws ec2 run-instances \
+		       --count 1 \
+		       --image-id ${IMAGEID} \
+		       --key-name ${KEYNAME} \
+		       --security-group-ids ${SGNAME} \
+		       --instance-type ${INSTANCETYPE})
     if [[ $? != 0 ]]
     then
 	echo "Launch failed"
@@ -172,9 +174,22 @@ function awscli_wait_run() {
 }
 
 # #############################################################
-# Terminate an ASW instance.
+# Terminate an AWS instance.
 # #############################################################
 
 function awscli_terminate() {
     aws ec2 terminate-instances --instance-ids "${1}"
+}
+
+# #############################################################
+# install minikube on the AWS instance
+# #############################################################
+
+function awscli_install_minikube() {
+    local ipaddr=${1}
+    ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
+curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64 && \
+sudo mv /tmp/minikube-linux-amd64 /usr/local/bin/minikube && \
+/usr/local/minikube start
+EOF
 }
