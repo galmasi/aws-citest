@@ -20,7 +20,7 @@ jobs:
       - name: update OS
         run: |
           sudo apt-get update
-          sudo apt-get install -y jq docker.io
+          sudo apt-get install -y jq
 
       # ---------------------------
       # install and configure AWSCLI
@@ -57,8 +57,8 @@ jobs:
       # ---------------------------
       # terminate the VM
       # ---------------------------
-      - name: finish
-        if: success() || failure()
-        run: |
-          . ./bin/awscli_util.sh
-          if [[ ${instanceid} != "" ]] ; then awscli_terminate ${instanceid} ; fi
+#      - name: finish
+#        if: success() || failure()
+#        run: |
+#          . ./bin/awscli_util.sh
+#          if [[ ${instanceid} != "" ]] ; then awscli_terminate ${instanceid} ; fi
