@@ -28,7 +28,7 @@ jobs:
       - name: install awscli
         run: |
           . ./bin/awscli_util.sh
-          awscli_install
+          #awscli_install
           awscli_config
         env:
           AWS_KEYPAIR: ${{secrets.GEORGES_AWS_KEYPAIR}}
