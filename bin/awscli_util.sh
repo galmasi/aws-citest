@@ -16,7 +16,7 @@ function awscli_install() {
         echo "Failed to download awscli. Exiting."
         exit -1
     fi
-    (cd /tmp && unzip awscli2.zip && ./aws/install)
+    (cd /tmp && unzip awscliv2.zip && ./aws/install)
     export PATH=${PATH}:/usr/local/bin
     aws --version
 }
