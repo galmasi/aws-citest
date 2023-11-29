@@ -202,12 +202,15 @@ function awscli_install_minikube() {
     ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
 sudo apt-get update
 sudo apt-get install -y docker.io
+sudo usermod -aG docker ubuntu
 EOF
     # install and start minikube
     ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF    
 curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
 sudo mv /tmp/minikube-linux-amd64 /usr/local/bin/minikube
-/usr/local/minikube start
+sudo chmod 755 /usr/local/bin/minikube
+/usr/local/bin/minikube start
+/usr/local/bin/minikube kubectl get nodes
 EOF
     # install helm (?)
     ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
