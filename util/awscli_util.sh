@@ -223,12 +223,12 @@ function awscli_terminate() {
 # #############################################################
 
 function awscli_start_minikube() {
-    echo "awscli_start_minikube (on IP=${1})"
     local ipaddr=${1}
     # install docker
+    echo "awscli_start_minikube (on IP=${1}): installing docker"
     ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
-sudo apt-get update
-sudo apt-get install -y docker.io
+sudo apt-get update > /dev/null 2>&1
+sudo apt-get install -y docker.io  > /dev/null 2>&1
 sudo usermod -aG docker ubuntu
 EOF
     # install and start minikube
