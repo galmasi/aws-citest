@@ -41,7 +41,7 @@ jobs:
       - name: create EC2 VM
         run: |
           . ./util/awscli_util.sh
-          instanceid=$(awscli_launch aws-citest)
+          instanceid=$(awscli_launch awscitest)
           echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
           awscli_wait_run ${instanceid} || exit -1
           echo "ipaddr=$(awscli_get_ipaddr ${instanceid})" >> ${GITHUB_ENV}
