@@ -251,8 +251,8 @@ EOF
 # #############################################################
 
 function awscli_access_minikube() {
-    echo "awscli_checking minikube access (on IP=${1})"
     local ipaddr=${1}
+    echo "awscli_access_minikube: copying credentials from ${ipaddr}"
     mkdir -p ${HOME}/.kube
     scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.kube/config ${HOME}/.kube/config && \
     scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/ca.crt ${HOME}/.kube/ca.crt && \
@@ -260,24 +260,35 @@ function awscli_access_minikube() {
     scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/profiles/minikube/client.key ${HOME}/.kube/client.key
     if [[ $? != 0 ]]
     then
-        echo "failed to copy credentials from EC2 VM"
+        echo "ERROR: failed to copy credentials from EC2 VM"
         exit -1
     fi
 
     local serverip=$(yq -r .clusters[0].cluster.server .kube/config | sed "s%https://%%" | sed "s/:.*//")
+    echo "awscli_access_minikube: server-local minikube address is ${serverip}"
 
     # change the kube configuration
-    sed -i "s%certificate-authority:.*%certificate-authority: ${HOME}/.kube/ca.crt%" ${HOME}/.kube/config
-    sed -i "s%client-certificate:.*%client-certificate: ${HOME}/.kube/client.crt%" ${HOME}/.kube/config
-    sed -i "s%client-key:.*%client-key: ${HOME}/.kube/client.key%" ${HOME}/.kube/config
+    echo "awscli_access_minikube: patching .kube/config"
+    sed -i "s%certificate-authority:.*%certificate-authority: ${HOME}/.kube/ca.crt%" ${HOME}/.kube/config && \
+    sed -i "s%client-certificate:.*%client-certificate: ${HOME}/.kube/client.crt%" ${HOME}/.kube/config && \
+    sed -i "s%client-key:.*%client-key: ${HOME}/.kube/client.key%" ${HOME}/.kube/config && \
     sed -i "s%server:.*%server: https://127.0.0.1:8443%" ${HOME}/.kube/config
+    if [[ $? != 0 ]]
+    then
+        echo "ERROR: failed to patch ${HOME}/.kube/config"
+        exit -1
+    fi
+    
     
     # we don't need to worry about cleaning up this connection,
     # because the last step of any GH action is to remove the target VM itself.
+    echo "awscli_access_minikube: creating a ssh tunnel to ${ipaddr}"
     nohup ssh -N -L 0.0.0.0:8443:${serverip}:8443 -i ~/.ssh/aws.pem ubuntu@${ipaddr} &
+    sleep 5
 
     # test
-    sleep 5
+    echo "awscli_access_minikube: testing kubectl"
+    export KUBECONFIG=${HOME}/.kube/config
     kubectl get nodes
 }
 
