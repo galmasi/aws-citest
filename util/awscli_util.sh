@@ -65,28 +65,28 @@ function awscli_config() {
     fi
     
     # create ssh configuration and credentials
-    mkdir ~/.ssh
-    cat > ~/.ssh/config <<EOF
+    mkdir ${HOME}/.ssh
+    cat > ${HOME}/.ssh/config <<EOF
 StrictHostKeyChecking=no
 UserKnownHostsFile=/dev/null
 LogLevel=ERROR
 EOF
-    echo "${AWS_KEYPAIR}" > ~/.ssh/aws.pem
-    chmod 600 ~/.ssh/aws.pem
+    echo "${AWS_KEYPAIR}" > ${HOME}/.ssh/aws.pem
+    chmod 600 ${HOME}/.ssh/aws.pem
 
     # create AWS CLI configuration and credentials
-    mkdir ~/.aws
-    cat > ~/.aws/config <<EOF
+    mkdir ${HOME}/.aws
+    cat > ${HOME}/.aws/config <<EOF
 [default]
 region = us-east-1
 EOF
-    chmod 0600 ~/.aws/config
-    cat > ~/.aws/credentials <<EOF
+    chmod 0600 ${HOME}/.aws/config
+    cat > ${HOME}/.aws/credentials <<EOF
 [default]
 aws_access_key_id = ${AWS_ACCESS_KEY_ID}
 aws_secret_access_key = ${AWS_ACCESS_KEY_SECRET}
 EOF
-    chmod 0600 ~/.aws/credentials
+    chmod 0600 ${HOME}/.aws/credentials
     return 0
 }
 
@@ -196,7 +196,7 @@ function awscli_wait_run() {
     echo -n "awscli_wait_run: performing uptime test: "
     while [[ $(date +%s) < $tend ]]
     do
-        if ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} uptime > /dev/null 2>&1
+        if ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} uptime > /dev/null 2>&1
         then
             local t1=$(date +%s)
             echo "done, $((t1-t0)) total seconds to launch"
@@ -226,13 +226,13 @@ function awscli_start_minikube() {
     local ipaddr=${1}
     # install docker
     echo "awscli_start_minikube (on IP=${1}): installing docker"
-    ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
+    ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
 sudo apt-get update > /dev/null 2>&1
 sudo apt-get install -y docker.io  > /dev/null 2>&1
 sudo usermod -aG docker ubuntu
 EOF
     # install and start minikube
-    ssh -i ~/.ssh/aws.pem ubuntu@${ipaddr} <<EOF    
+    ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} <<EOF    
 curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
 sudo mv /tmp/minikube-linux-amd64 /usr/local/bin/minikube
 sudo chmod 755 /usr/local/bin/minikube
@@ -254,17 +254,17 @@ function awscli_access_minikube() {
     local ipaddr=${1}
     echo "awscli_access_minikube: copying credentials from ${ipaddr}"
     mkdir -p ${HOME}/.kube
-    scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.kube/config ${HOME}/.kube/config && \
-    scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/ca.crt ${HOME}/.kube/ca.crt && \
-    scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/profiles/minikube/client.crt ${HOME}/.kube/client.crt && \
-    scp -i ~/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/profiles/minikube/client.key ${HOME}/.kube/client.key
+    scp -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr}:.kube/config ${HOME}/.kube/config && \
+    scp -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/ca.crt ${HOME}/.kube/ca.crt && \
+    scp -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/profiles/minikube/client.crt ${HOME}/.kube/client.crt && \
+    scp -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr}:.minikube/profiles/minikube/client.key ${HOME}/.kube/client.key
     if [[ $? != 0 ]]
     then
         echo "ERROR: failed to copy credentials from EC2 VM"
         exit -1
     fi
 
-    local serverip=$(yq -r .clusters[0].cluster.server .kube/config | sed "s%https://%%" | sed "s/:.*//")
+    local serverip=$(yq -r .clusters[0].cluster.server ${HOME}/.kube/config | sed "s%https://%%" | sed "s/:.*//")
     echo "awscli_access_minikube: server-local minikube address is ${serverip}"
 
     # change the kube configuration
@@ -283,7 +283,7 @@ function awscli_access_minikube() {
     # we don't need to worry about cleaning up this connection,
     # because the last step of any GH action is to remove the target VM itself.
     echo "awscli_access_minikube: creating a ssh tunnel to ${ipaddr}"
-    nohup ssh -N -L 0.0.0.0:8443:${serverip}:8443 -i ~/.ssh/aws.pem ubuntu@${ipaddr} &
+    nohup ssh -N -L 0.0.0.0:8443:${serverip}:8443 -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} &
     sleep 5
 
     # test

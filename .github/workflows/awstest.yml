@@ -71,7 +71,5 @@ jobs:
           . ./util/awscli_util.sh
           if [[ ${instanceid} != "" ]]
           then
-                # half-hour grace period to fix bugs
-                sleep 1800
                 awscli_terminate ${instanceid}
           fi
