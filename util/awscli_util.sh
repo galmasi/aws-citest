@@ -193,13 +193,14 @@ function awscli_wait_run() {
     fi
 
     # step 3: test public IP
-    echo -n "awscli_wait_run: performing uptime test: "
+    echo -n "awscli_wait_run: performing uptime test"
     while [[ $(date +%s) < $tend ]]
     do
         if ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} uptime > /dev/null 2>&1
         then
             local t1=$(date +%s)
-            echo "done, $((t1-t0)) total seconds to launch"
+            echo "done."
+            echo "awscli_wait_run: SUCCESS after $((t1-t0)) seconds."
             return 0
         fi
         echo -n "."
@@ -224,21 +225,38 @@ function awscli_terminate() {
 
 function awscli_start_minikube() {
     local ipaddr=${1}
+    local t0=$(date +%s)
     # install docker
-    echo "awscli_start_minikube (on IP=${1}): installing docker"
-    ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} <<EOF
-sudo apt-get update > /dev/null 2>&1
-sudo apt-get install -y docker.io  > /dev/null 2>&1
+    echo "awscli_start_minikube on ${ipaddr}: installing docker"
+    ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} > /tmp/docker-install.log 2>&1 <<EOF
+sudo apt-get update
+sudo apt-get install -y docker.io
 sudo usermod -aG docker ubuntu
 EOF
+    if [[ $? != 0 ]]
+    then
+        echo "ERROR: docker installation failed. Attaching log."
+        cat /tmp/docker-install.log
+        exit -1
+    fi
     # install and start minikube
-    ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} <<EOF    
+    echo "awscli_start_minikube on ${ipaddr}: installing minikube"
+    ssh -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr} > /tmp/minikube-install.log 2>&1 <<EOF    
 curl https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 -o /tmp/minikube-linux-amd64
 sudo mv /tmp/minikube-linux-amd64 /usr/local/bin/minikube
 sudo chmod 755 /usr/local/bin/minikube
 /usr/local/bin/minikube start
 /usr/local/bin/minikube kubectl get nodes
 EOF
+    if [[ $? != 0 ]]
+    then
+        echo "ERROR: minikube installation failed. Attaching log."
+        cat /tmp/minikube-install.log
+        exit -1
+    fi
+    local t1=$(date +%s)
+    echo "awscli_start_minikube: SUCCESS, total time=$((t1-t0))"
+    return 0
 }
 
 
@@ -252,6 +270,7 @@ EOF
 
 function awscli_access_minikube() {
     local ipaddr=${1}
+    local t0=$(date +%s)
     echo "awscli_access_minikube: copying credentials from ${ipaddr}"
     mkdir -p ${HOME}/.kube
     scp -i ${HOME}/.ssh/aws.pem ubuntu@${ipaddr}:.kube/config ${HOME}/.kube/config && \
@@ -289,7 +308,15 @@ function awscli_access_minikube() {
     # test
     echo "awscli_access_minikube: testing kubectl"
     export KUBECONFIG=${HOME}/.kube/config
-    kubectl get nodes
+    kubectl get nodes > /dev/null 2>&1
+    if [[ $? != 0 ]]
+    then
+        echo "ERROR: kubectl failed to access minikube on ${ipaddr}."
+        exit -1
+    fi
+    local t1=$(date +%s)
+    echo "awscli_access_minikube: SUCCESS after $((t1-t0)) seconds."
+    return 0
 }
 
 
