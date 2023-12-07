@@ -103,7 +103,6 @@ EOF
 # #############################################################
 
 function awscli_launch() {
-    echo "awscli_launch: creating EC2 VM with UEFI boot and TPM support"
     local vmname=${1:-citest}
     local output=$(aws ec2 run-instances \
 		       --count 1 \
