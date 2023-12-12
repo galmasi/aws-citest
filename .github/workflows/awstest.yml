@@ -63,6 +63,13 @@ jobs:
           awscli_access_minikube ${ipaddr}
 
       # ---------------------------
+      # run a basic, simple AO test
+      # ---------------------------
+      - name: run a simple test of the attestation operator
+        run: |
+          ./util/test_ao.sh
+
+      # ---------------------------
       # terminate the VM
       # ---------------------------
       - name: finish
