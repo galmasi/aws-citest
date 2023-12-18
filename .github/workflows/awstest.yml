@@ -67,7 +67,7 @@ jobs:
       # ---------------------------
       - name: run a simple test of the attestation operator
         run: |
-          ./tests/scenario1/run_test.sh
+          ./tests/scenario1/runtest.sh
 
       # ---------------------------
       # terminate the VM
