@@ -63,11 +63,11 @@ jobs:
           awscli_access_minikube ${ipaddr}
 
       # ---------------------------
-      # run a basic, simple AO test: w/o a keylime agent
+      # run all test scenarios
       # ---------------------------
-      - name: run a simple test of the attestation operator
+      - name: run test scenarios
         run: |
-          ./tests/scenario1/runtest.sh
+          ./tests/runtests.sh
 
       # ---------------------------
       # terminate the VM
