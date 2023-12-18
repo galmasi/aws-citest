@@ -3,11 +3,12 @@
 passed=0
 failed=0
 total=0
-for test in `find tests -type d | sort`
+for test in `find tests -name runtest.sh -type f | sort`
 do
-    echo "RUNNING TEST: ${test}"
+    testdir=$(dirname ${test})
+    echo "RUNNING TEST: ${testdir}"
     echo "---------------------"
-    if ${test}/runtest.sh
+    if ${test}
     then
         passed=$((passed+1))
     else
