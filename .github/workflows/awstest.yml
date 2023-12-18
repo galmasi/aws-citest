@@ -27,7 +27,7 @@ jobs:
       # ---------------------------
       - name: install awscli and helm
         run: |
-          . ./util/awscli_util.sh
+          . ./util/util_awscli.sh
           awscli_config
           helm_install
         env:
@@ -40,7 +40,7 @@ jobs:
       # ---------------------------
       - name: create EC2 VM
         run: |
-          . ./util/awscli_util.sh
+          . ./util/util_awscli.sh
           instanceid=$(awscli_launch awscitest)
           echo "instanceid=${instanceid}" >> ${GITHUB_ENV}
           awscli_wait_run ${instanceid} || exit -1
@@ -51,7 +51,7 @@ jobs:
       # ---------------------------
       - name: install and start minikube
         run: |
-          . ./util/awscli_util.sh
+          . ./util/util_awscli.sh
           awscli_start_minikube ${ipaddr}
 
       # ---------------------------
@@ -59,7 +59,7 @@ jobs:
       # ---------------------------
       - name: access minikube from GHA
         run: |
-          . ./util/awscli_util.sh
+          . ./util/util_awscli.sh
           awscli_access_minikube ${ipaddr}
 
       # ---------------------------
@@ -75,7 +75,7 @@ jobs:
       - name: finish
         if: success() || failure()
         run: |
-          . ./util/awscli_util.sh
+          . ./util/util_awscli.sh
           if [[ ${instanceid} != "" ]]
           then
                 awscli_terminate ${instanceid}
