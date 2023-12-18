@@ -53,9 +53,9 @@ function ao_deploy() {
     local aodir=${1}
     local values=${2}
     (cd ${aodir}
-     ln -sf ${valuesfile} ./values.yaml
      echo -n "Deploying keylime with helm ... "
-     make helm-keylime-deploy > /tmp/helm-deploy.log 2>&1
+     make HELM_CHART_CUSTOM_VALUES=${values} \
+          helm-keylime-deploy > /tmp/helm-deploy.log 2>&1
      if [[ $? != 0 ]]
      then
          echo "\nERROR: helm deploy failed. Attaching log."
