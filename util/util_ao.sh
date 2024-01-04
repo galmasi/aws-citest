@@ -25,6 +25,22 @@ function ao_clone() {
 }
 
 # #########################
+# apply patches. Ignore failures.
+# #########################
+
+function ao_patch() {
+    local aodir=${1}
+    local patchdir=${2}
+    local realpatchdir=$(realpath ${patchdir})
+    for f in $(find ${realpatchdir} -type f -name *.patch)
+    do
+        echo "Applying patches: ${f}"
+        (cd ${aodir}; cat ${f} | patch -f -p1) > /dev/null 2>&1
+    done
+    return 0
+}
+
+# #########################
 # utility: build the AO helm chart
 # #########################
 

@@ -1,0 +1,13 @@
+diff --git a/build/helm/keylime/charts/keylime-init/templates/ca-job.yaml b/build/helm/keylime/charts/keylime-init/templates/ca-job.yaml
+index 7366a29..cfbe3cb 100644
+--- a/build/helm/keylime/charts/keylime-init/templates/ca-job.yaml
++++ b/build/helm/keylime/charts/keylime-init/templates/ca-job.yaml
+@@ -48,7 +48,7 @@ spec:
+             {{- if .Values.global.configmap.configParams }}
+             {{- range $k, $v := .Values.global.configmap.configParams }}
+             - name: {{ $k }}
+-              value: {{ $v }}
++              value: "{{ $v }}"
+             {{- end }}
+             {{- end}}
+           command:
