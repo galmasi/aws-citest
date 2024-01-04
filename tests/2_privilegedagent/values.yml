@@ -13,3 +13,8 @@ global:
       type: NodePort
     verifier:
       type: NodePort
+
+  configmap:
+    configParams:
+      KEYLIME_TENANT_REQUIRE_EK_CERT: False
+      
