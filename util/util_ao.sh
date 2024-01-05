@@ -8,6 +8,8 @@
 function ao_clone() {
     local basedir=${1}
     local aodir=${2}
+    local patchdir=${3}
+    local realpatchdir=$(realpath ${patchdir})
     (cd ${basedir}
      if ! test -d ${basedir}/${aodir}
      then
@@ -20,24 +22,13 @@ function ao_clone() {
              exit -1
          fi
          echo "  done"
+         for f in $(find ${realpatchdir} -type f -name *.patch)
+         do
+             echo "Applying patches: ${f}"
+             (cd ${aodir}; cat ${f} | patch -f -p1) > /dev/null 2>&1
+         done
      fi
      return 0)
-}
-
-# #########################
-# apply patches. Ignore failures.
-# #########################
-
-function ao_patch() {
-    local aodir=${1}
-    local patchdir=${2}
-    local realpatchdir=$(realpath ${patchdir})
-    for f in $(find ${realpatchdir} -type f -name *.patch)
-    do
-        echo "Applying patches: ${f}"
-        (cd ${aodir}; cat ${f} | patch -f -p1) > /dev/null 2>&1
-    done
-    return 0
 }
 
 # #########################
