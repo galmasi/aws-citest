@@ -14,11 +14,12 @@ do
     else
         failed=$((failed+1))
     fi
+    echo ""
     total=$((total+1))
 done
 
-echo "======================================"
-printf "| Summary: %2d/%2d/%2d total/pass/fail |" ${total} ${passed} ${failed}
-echo "======================================"
+echo "+====================================+"
+printf "| Summary: %2d/%2d/%2d total/pass/fail  |\n" ${total} ${passed} ${failed}
+echo "+====================================+"
 
 exit ${failed}
